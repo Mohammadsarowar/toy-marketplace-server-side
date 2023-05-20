@@ -44,6 +44,29 @@ async function run() {
         .toArray();
       res.send(toys);
     });
+    
+    app.post("/post-toys", async (req, res) => {
+      const body = req.body;
+      body.createdAt = new Date();
+      console.log(body);
+      const result = await database.insertOne(body);
+      if (result?.insertedId) {
+        return res.status(200).send(result);
+      } else {
+        return res.status(404).send({
+          message: "can not insert try again leter",
+          status: false,
+        });
+      }
+    });
+    app.get("/myToys/:email", async (req, res) => {
+      console.log(req.params.id);
+      const jobs = await database.find({
+          seller_email: req.params.email,
+        })
+        .toArray();
+      res.send(jobs);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
