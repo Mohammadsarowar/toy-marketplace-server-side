@@ -89,9 +89,19 @@ async function run() {
     })
 
     app.patch('/update/:id',async(req,res)=>{
+      const id  = req.params.id
+      const filter = {_id: new ObjectId(id)}
       const updateData = req.body
       console.log(updateData);
+      const updateDoc = {
+        $set: {
+          status:updateData.status
+        }
+      };
+      const result = await database.updateOne(filter,updateDoc)
+      res.send(result)
     })
+  
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
