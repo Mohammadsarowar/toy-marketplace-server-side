@@ -1,4 +1,5 @@
 const express = require("express");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 
 const app = express();
@@ -8,8 +9,8 @@ app.use(cors());
 app.use(express.json());
 require("dotenv").config();
 
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ac-o6iroya-shard-00-00.wymoxsw.mongodb.net:27017,ac-o6iroya-shard-00-01.wymoxsw.mongodb.net:27017,ac-o6iroya-shard-00-02.wymoxsw.mongodb.net:27017/?ssl=true&replicaSet=atlas-puyajh-shard-0&authSource=admin&retryWrites=true&w=majority`;
+
+const uri = `mongodb://toyMarketplace:33WbCeGUAMMdgk8w@ac-o6iroya-shard-00-00.wymoxsw.mongodb.net:27017,ac-o6iroya-shard-00-01.wymoxsw.mongodb.net:27017,ac-o6iroya-shard-00-02.wymoxsw.mongodb.net:27017/?ssl=true&replicaSet=atlas-puyajh-shard-0&authSource=admin&retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -23,20 +24,20 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const database = client.db("toyMarketplace").collection("allCar");
     app.get("/allToy", async (req, res) => {
       const cursor = database.find();
       const result = await cursor.toArray();
       res.send(result);
     });
-    app.get("/allToy/:id", async (req, res) => {
+    app.get("/Toy/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await database.findOne(query);
       res.send(result);
     });
-    app.get("/allToy/:category", async (req, res) => {
+    app.get("/allToys/:category", async (req, res) => {
       console.log(req.params.id);
       const toys = await database.find({
           status: req.params.category
@@ -59,6 +60,7 @@ async function run() {
         });
       }
     });
+
     app.get("/myToys/:email", async (req, res) => {
       console.log(req.params.id);
       const jobs = await database.find({
@@ -66,6 +68,18 @@ async function run() {
         })
         .toArray();
       res.send(jobs);
+    });
+
+    app.get("/toySearchText/:text", async (req, res) => {
+      const searchText = req.params.text;
+      const result = await database.find({
+          $or: [
+            { toy_name: { $regex: searchText, $options: "i" } },
+            { seller_email: { $regex:searchText, $options: "i" } },
+          ],
+        })
+        .toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
