@@ -88,6 +88,11 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/update/:id',async(req,res)=>{
+      const updateData = req.body
+      console.log(updateData);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
